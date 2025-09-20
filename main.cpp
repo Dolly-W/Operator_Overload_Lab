@@ -3,6 +3,15 @@
 #include <string>
 #include <limits>
 
+
+//Function for input Validation
+void invalidInput() {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+
+
 class BankAccount {
 public:
     //Default Constructor
@@ -17,16 +26,112 @@ public:
         holderName = holder;
         balance = bal;
     }
-    //Mutators(setter)
-    void SetAccountHolderName(std::string name);
-    void Deposit(double amount);
-    void Withdraw(double amount);
+    // Copy Constructor
+    //Ensures deep copy of all member variables
+    BankAccount(const BankAccount& other) {
+        accountNumber = other.accountNumber;
+        holderName = other.holderName;
+        balance = other.balance;
+    }
+    //Copy Assignment Operator
+    //Assigns one BankAccount object to another
+    BankAccount& operator=(const BankAccount& other) {
+        accountNumber = other.accountNumber;
+        holderName = other.holderName;
+        balance = other.balance;
+        return *this;
+    }
+    //Destructor
+    ~BankAccount() {
+
+    }
+
+    //Operator overload: +=
+    //Adds money to the balance (used for deposits)
+    BankAccount& operator+=(double amount) {
+        if (amount > 0) {
+            balance = balance + amount;
+            std::cout << "Deposit Was Successful. \nUpdated Balance: $" << balance << std::endl;
+        }
+        else {
+            std::cout << "Invalid Deposit Amount" << std::endl;
+        }
+        return *this;
+    }
+
+    //-Operator overload: -=
+    //Subtracts money from the balance (used for withdrawals)
+    BankAccount& operator-=(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance = balance - amount;
+            std::cout << "Withdrawal Was Successful. \nUpdated Balance: $" << balance << std::endl;
+        }
+        else {
+            std::cout <<"Withdrawal Failed. Insufficient Funds" << std::endl;
+        }
+        return *this;
+    }
+
+    //-Comparison Operators
+    //If account numbers are the same, return true. Otherwise, return false
+    bool operator==(const BankAccount &other) const {
+        return accountNumber == other.accountNumber;
+    }
+    //If first selected account is less than second selected account, return true. Otherwise, return false
+    bool operator<(const BankAccount &other) const {
+        return balance < other.balance;
+    }
+    //If first selected account is greater than second selected account, return true. Otherwise, return false
+    bool operator>(const BankAccount &other) const {
+        return balance > other.balance;
+    }
+
+//Static Utility Functions
+    //Prints account details
+    static void printAccount(const BankAccount &account) {
+        std::cout << "Account Number: " << account.accountNumber << std::endl;
+        std::cout << "Holder Name: " << account.holderName << std::endl;
+        std::cout << "Balance: $" << account.balance << std::endl;
+    }
+    //Prompts the user for account information
+    static BankAccount createAccountFromInput () {
+        std::string accNum;
+        std::string holder;
+        double bal;
+
+        std::cout << "Enter Account Number: " << std::endl;
+        std::getline(std::cin, accNum);
+
+        std::cout << "Enter Account Holder Name: " << std::endl;
+        std::getline(std::cin, holder);
+
+        //Input validation for initial balance
+        while (true) {
+            std::cout << "Enter Initial Balance: " << std::endl;
+            std::cin >> bal;
+            if (std::cin.fail()) {
+                invalidInput();
+                std::cout << "Invalid Input, Please Enter A Number" << std::endl;
+            }
+            else if (bal <= 0) {
+                std::cout << "Invalid Input, Please Enter A Number Greater Than 0" << std::endl;
+            }
+            else {
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                break;
+            }
+
+        }
+        //Returns a new BankAccount objected from inputed data
+        return BankAccount(accNum, holder, bal);
+    }
+
 
     //Accessor(getters)
     std::string GetAccountNumber() const;
     std::string GetHolderName() const;
     double GetBalance() const;
-    void Display() const;
+
 
 private:
     //Variables
@@ -44,40 +149,11 @@ std::string BankAccount::GetHolderName() const {
 double BankAccount::GetBalance() const {
     return balance;
 }
-//Display all Account Details
-void BankAccount::Display() const {
-    std::cout << "Account Number: " << accountNumber << std::endl;
-    std::cout << "Holder Name: " << holderName << std::endl;
-    std::cout << "Balance: " << balance << std::endl;
-}
-//Mutators
-void BankAccount::SetAccountHolderName(std::string name) {
-    holderName = name;
-}
 
-void BankAccount::Deposit(double amount) {
-        balance = balance + amount;
-        std::cout << "Deposit Was Successful. \nUpdated Balance: $" << balance << std::endl;
-}
-
-void BankAccount::Withdraw(double amount) {
-    if (amount > 0 && amount <= balance) {
-        balance = balance - amount;
-        std::cout << "Withdrawal Was Successful. \nUpdated Balance: $" << balance << std::endl;
-    }
-    else {
-        std::cout << "Withdrawal Failed. Insufficient Funds" << std::endl;
-    }
-}
-//Function for input Validation
-void invalidInput() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
 
 
 int main () {
-    std::vector<BankAccount> accounts;
+    std::vector<BankAccount> accounts; //Stores all bank accounts
     int choice;
 
     do {
@@ -87,7 +163,8 @@ int main () {
         std::cout << "2) Deposit Money" << std::endl;
         std::cout << "3) Withdrawal Money" << std::endl;
         std::cout << "4) Display all Accounts" << std::endl;
-        std::cout << "5) Exit" << std::endl;
+        std::cout << "5) Compare Accounts" << std::endl;
+        std::cout << "6) Exit" << std::endl;
 
         while (true) {
             std::cout << "Enter Choice: ";
@@ -98,9 +175,9 @@ int main () {
                 std::cout << "Invalid Input, Please Enter A Number" << std::endl;
             }
             //Input Validation if input number less than 1
-            else if (choice < 1 || choice > 5) {
+            else if (choice < 1 || choice > 6) {
                 invalidInput();
-                std::cout << "Invalid Input, Please Enter A Number Between 1-5" << std::endl;
+                std::cout << "Invalid Input, Please Enter A Number Between 1-6" << std::endl;
             }
             else {
                 //clear input
@@ -111,36 +188,7 @@ int main () {
 
         switch (choice) {
             case 1: {
-                std::string accNum;
-                std::string holder;
-                double bal;
-
-                std::cout << "Enter Account Number: " << std::endl;
-                getline(std::cin, accNum);
-
-                std::cout << "Enter Account Holder Name: " << std::endl;
-                getline(std::cin, holder);
-
-                while (true) {
-                    std::cout << "Enter Initial Balance: " << std::endl;
-                    std::cin >> bal;
-                    //Input Validation if user inputs letters
-                    if (std::cin.fail()) {
-                        invalidInput();
-                        std::cout << "Invalid Input, Please Enter A Number" << std::endl;
-                    }
-                    //Input Validation if user inputs number less than 1
-                    else if (bal <= 0) {
-                        invalidInput();
-                        std::cout << "Invalid Input, Please Enter A Number Greater Than 0" << std::endl;
-                    }
-                    else {
-                        //clear input
-                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                        break;
-                    }
-                }
-                accounts.push_back(BankAccount(accNum, holder, bal));
+                accounts.push_back(BankAccount::createAccountFromInput());
                 break;
             }
             case 2: {
@@ -199,7 +247,7 @@ int main () {
                     }
                 }
                 //Adds deposit amount into selected account
-                accounts[accountChoice - 1].Deposit(amount);
+                accounts[accountChoice - 1] += amount;
                 break;
             }
             case 3: {
@@ -258,7 +306,7 @@ int main () {
                     }
                 }
                 //removes withdrawal amount from selected account
-                accounts[accountChoice - 1].Withdraw(amount);
+                accounts[accountChoice - 1] -= amount;
                 break;
             }
             case 4: {
@@ -269,18 +317,100 @@ int main () {
                 }
                 //display all accounts
                 for (int i = 0; i < accounts.size(); i++) {
-                    std::cout << "Account " << i + 1 << ":" << std::endl;
-                    accounts[i].Display();
+                    BankAccount::printAccount(accounts[i]);
                 }
                 break;
             }
-            case 5:
+            case 5: {//Compares two accounts
+                if (accounts.empty()) {
+                    std::cout << "No Accounts Exist Yet, Please Create One" << std::endl;
+                    break;
+                }
+                if (accounts.size() < 2) {
+                    std::cout << "Need At Least Two Accounts To Compare" << std::endl;
+                    break;
+                }
+
+                int acc1;
+                int acc2;
+
+                while (true) {
+                    //First account selection
+                    std::cout << "Select First Account: " << std::endl;
+                    for (int i = 0; i < accounts.size(); i++) {
+                        std::cout << i + 1 << ") " << accounts[i].GetAccountNumber() << " - " << accounts[i].GetHolderName() << std::endl;
+                    }
+                    std::cin >> acc1;
+
+                    if (std::cin.fail()) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Please Enter A Number" << std::endl;
+                    }
+                    else if (acc1 < 1) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Please Enter A Number Greater Than 0" << std::endl;
+                    }
+                    else if (acc1 > accounts.size()) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Account Doesn't Exist" << std::endl;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                while (true) {
+                    //Second account selection
+                    std::cout << "Select Second Account: " << std::endl;
+                    for (int i = 0; i < accounts.size(); i++) {
+                        std::cout << i + 1 << ") " << accounts[i].GetAccountNumber() << " - " << accounts[i].GetHolderName() << std::endl;
+                    }
+                    std::cin >> acc2;
+                    if (std::cin.fail()) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Please Enter A Number" << std::endl;
+                    }
+                    else if (acc2 < 1) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Please Enter A Number Greater Than 0" << std::endl;
+                    }
+                    else if (acc2 > accounts.size()) {
+                        invalidInput();
+                        std::cout << "Invalid Input, Account Doesn't Exist" << std::endl;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                //-Overload operators to compare accounts
+                //If account numbers are the name
+                if (accounts[acc1 -1] == accounts[acc2 - 1]) {
+                    std:: cout << "Account " << acc1 << " and " << acc2 << " have the same account number" << std::endl;
+                }
+                else {
+                    //If account numbers are different
+                    std::cout << "Account " << acc1 << " and " << acc2 << " have different account numbers" << std::endl;
+                }
+                //If first selected account has lower balance than second selected account
+                if (accounts[acc1 - 1] < accounts[acc2 - 1]) {
+                    std::cout << "Account " << acc1 << " has a lower balance than Account " << acc2 << std::endl;
+                }
+                //If first selected account has greater balance than second account
+                else if (accounts[acc1 - 1] > accounts[acc2 - 1]) {
+                    std::cout << "Account " << acc1 << " has a higher balance than Account " << acc2 << std::endl;
+                }
+                else {
+                    //If both selected accounts have same balance
+                    std::cout << "Both accounts have the same balance" << std::endl;
+                }
+                break;
+            }
+            case 6:
                 std::cout << "Exiting Program..." << std::endl;
                 break;
             default:
                 std::cout << "Invalid Input, Please Try Again" << std::endl;
         }
     }
-    while (choice != 5);
+    while (choice != 6);
     return 0;
 }
